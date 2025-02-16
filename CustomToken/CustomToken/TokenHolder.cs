@@ -16,28 +16,28 @@ namespace CustomTokenTest
         public bool AutoDecrease {  get; private set; }
         public int Interval { get; private set; }
 
-        public void SetTimer(int interval,bool autoDecrease)
+        public void SetTimer(int interval)
         {
             aTimer = new System.Timers.Timer(interval);
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
-            aTimer.Enabled = autoDecrease;
+            aTimer.Enabled = true;
         }
 
         public void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            DecValidityPeriod();
+            DecreaseExpirationTime();
         }
 
-        public void DecValidityPeriod()
+        public void DecreaseExpirationTime()
         {
             if (tokens.Count > 0)
             {
                 for (int i = tokens.Count-1; i >= 0; i--)
                 {
-                    if (tokens[i].ExpirationTime > 0)
+                    if (tokens[i].RemainingTime > 0)
                     {
-                        tokens[i].ExpirationTime--;
+                        tokens[i].DecreaseRemainingTime();
                     }
                     else
                     {
@@ -47,19 +47,45 @@ namespace CustomTokenTest
             }
         }
 
-        public void GenerateToken(Guid userId, int level, string userName)
+        public void GenerateToken(Guid userId, int level, string userName, int expirationTime)
         {
-            tokens.Add(new CustomToken(userId, level, userName,20));
+            tokens.Add(new CustomToken(userId, level, userName,expirationTime));
         }
 
-        public TokenHolder(int interval,bool autoDecrease)
+        public TokenHolder(int interval)
         {
-            this.Interval = interval;
-            this.AutoDecrease = autoDecrease;
-            SetTimer(Interval,AutoDecrease);
+            Interval = interval;           
+            SetTimer(Interval);
+        }
+
+        public CustomToken CheckTokenValidity(Guid token) 
+        {
+            int index = -1;
+            for (int i = 0; i < tokens.Count; i++) {
+                if (tokens[i].Token == token) 
+                {
+                    index = i; break;
+                }            
+            }
+            if (index != -1)
+            {
+                tokens[index].ResetRemainingTime(); 
+                return tokens[index];
+            }
+            else
+            {
+                return new CustomToken(new Guid(), -1, "", 0);  
+            }
+            
+        
         }
 
 
+
+        ~TokenHolder() 
+        { 
+            aTimer.Close(); 
+        }
 
 
 
