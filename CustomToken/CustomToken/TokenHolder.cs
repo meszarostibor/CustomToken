@@ -13,8 +13,26 @@ namespace CustomTokenTest
 
         public static System.Timers.Timer aTimer;
 
-        public bool AutoDecrease {  get; private set; }
-        public int Interval { get; private set; }
+        public bool AutoDecrease { get; private set; }
+        public bool AutoChangeToken { get; private set; }
+        int interval;
+        public int Interval
+        {
+            get { return interval; }
+            set
+            {
+                interval = value;
+                if (interval == 0)
+                {
+                    aTimer.Close();
+                }
+                else
+                {
+                    SetTimer(Interval);
+                }
+
+            }
+        }
 
         public void SetTimer(int interval)
         {
@@ -29,11 +47,15 @@ namespace CustomTokenTest
             DecreaseExpirationTime();
         }
 
+        public Guid GetMasterToken() 
+        {
+            return tokens[0].Token;
+        }
         public void DecreaseExpirationTime()
         {
             if (tokens.Count > 0)
             {
-                for (int i = tokens.Count-1; i >= 0; i--)
+                for (int i = tokens.Count - 1; i > 0; i--)
                 {
                     if (tokens[i].RemainingTime > 0)
                     {
@@ -49,42 +71,52 @@ namespace CustomTokenTest
 
         public void GenerateToken(Guid userId, int level, string userName, int expirationTime)
         {
-            tokens.Add(new CustomToken(userId, level, userName,expirationTime));
+            tokens.Add(new CustomToken(userId, level, userName, expirationTime));
         }
 
-        public TokenHolder(int interval)
+        public TokenHolder(bool autoChange, int interval)
         {
-            Interval = interval;           
-            SetTimer(Interval);
+            AutoChangeToken = autoChange;
+            tokens.Add(new CustomToken(Guid.NewGuid(), 9, "Master", 0));
+            Interval = interval;
         }
 
-        public CustomToken CheckTokenValidity(Guid token) 
+        public TokenHolder(Guid masterToken, bool autoChange, int interval)
+        {
+            AutoChangeToken = autoChange;
+            tokens.Add(new CustomToken(masterToken, Guid.NewGuid(), 9, "Master", 0));
+            Interval = interval;
+        }
+
+        public CustomToken CheckTokenValidity(Guid token)
         {
             int index = -1;
-            for (int i = 0; i < tokens.Count; i++) {
-                if (tokens[i].Token == token) 
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                if (tokens[i].Token == token)
                 {
                     index = i; break;
-                }            
+                }
             }
             if (index != -1)
             {
-                tokens[index].ResetRemainingTime(); 
+                tokens[index].ResetRemainingTime();
+                if (AutoChangeToken == true && index!=0) { tokens[index].Token = Guid.NewGuid(); }
                 return tokens[index];
             }
             else
             {
-                return new CustomToken(new Guid(), -1, "", 0);  
+                return new CustomToken(new Guid(), -1, "", 0);
             }
-            
-        
+
+
         }
 
 
 
-        ~TokenHolder() 
-        { 
-            aTimer.Close(); 
+        ~TokenHolder()
+        {
+            aTimer.Close();
         }
 
 

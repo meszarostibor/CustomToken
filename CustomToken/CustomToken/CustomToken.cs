@@ -8,9 +8,9 @@ namespace CustomTokenTest
 {
     public class CustomToken
     {
-        public Guid Token { get; private set; }
+        public Guid Token { get; set; }
         public Guid UserId {get; private set; }
-        public int Level { get; private set; }
+        public int Permission { get; private set; }
         public string UserName {get; private set; }
 
         int expirationTime;
@@ -34,15 +34,25 @@ namespace CustomTokenTest
             }
         }
                  
-        public CustomToken(Guid userId, int level, string userName, int expirationTime) {
+        public CustomToken(Guid userId, int permission, string userName, int expirationTime) {
             Token = Guid.NewGuid();
             UserId = userId;
-            Level = level;
+            Permission = permission;
             UserName = userName;
             ExpirationTime = expirationTime;
             RemainingTime = expirationTime;
         }
 
-        public override string ToString() { return $"{Token};{UserId};{Level};{UserName}"; }
+        public CustomToken(Guid masterToken,Guid userId, int permission, string userName, int expirationTime)
+        {
+            Token = masterToken;
+            UserId = userId;
+            Permission = permission;
+            UserName = userName;
+            ExpirationTime = expirationTime;
+            RemainingTime = expirationTime;
+        }
+
+        public override string ToString() { return $"{Token};{UserId};{Permission};{UserName}"; }
     }
 }

@@ -18,10 +18,9 @@ namespace CustomTokenTest
     /// </summary>
     public partial class MainWindow : Window
     {
-
-        string[] levels = new string[6] { "0", "1", "2", "3", "4", "5" };
+        string[] levels = new string[10] { "0", "1", "2", "3", "4", "5", "6", "7", "8","9" };
         string[] expirationTime = new string[] { "20","30","60","600","3600"};
-        TokenHolder tokenHolder = new TokenHolder(1000);
+        TokenHolder tokenHolder = new TokenHolder(true,1000);
 
         public static System.Timers.Timer aTimer1;
         private object guid;
@@ -36,10 +35,9 @@ namespace CustomTokenTest
 
         public void OnTimed1Event(Object source, ElapsedEventArgs e)
         {
-
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // tokenHolder.DecValidityPeriod();
+                dataGrid1.ItemsSource = tokenHolder.tokens;
                 dataGrid1.Items.Refresh();
             });
 
@@ -48,14 +46,14 @@ namespace CustomTokenTest
         public MainWindow()
         {
             InitializeComponent();
-            cmbLevel.ItemsSource = levels;
-            cmbLevel.SelectedIndex = 2;
+            cmbPermission.ItemsSource = levels;
+            cmbPermission.SelectedIndex = 2;
             cmbExpirationTime.ItemsSource = expirationTime;
             cmbExpirationTime.SelectedIndex = 3;
             txbUserName.Text = "Bármi Áron";
             txbUserId.Text = Guid.NewGuid().ToString();
             dataGrid1.ItemsSource = tokenHolder.tokens;
-            txbVerification.Text = "Click on an item in the list";
+            txbVerification.Text = "Click on an item in the list!";
             SetTimer();
             
         }
@@ -71,7 +69,7 @@ namespace CustomTokenTest
         {
             try
             {
-                tokenHolder.GenerateToken(Guid.Parse(txbUserId.Text), int.Parse(cmbLevel.Text), txbUserName.Text, int.Parse(cmbExpirationTime.Text));
+                tokenHolder.GenerateToken(Guid.Parse(txbUserId.Text), int.Parse(cmbPermission.Text), txbUserName.Text, int.Parse(cmbExpirationTime.Text));
                 dataGrid1.Items.Refresh();
             }
             catch 
@@ -102,16 +100,15 @@ namespace CustomTokenTest
             {
                 tbxTokenValidity.Clear();
                 CustomToken t = tokenHolder.CheckTokenValidity(Guid.Parse(txbVerification.Text));
-                if (t.Level < 0)
+                if (t.Permission < 0)
                 {
                     tbxTokenValidity.Text = "Invalid token!";
                 }
                 else
                 {
-                    tbxTokenValidity.Text = "Level: " + t.Level.ToString();
-                    tbxTokenValidity.Text += $"\nId: {t.UserId}";
-                    tbxTokenValidity.Text += $"\nUserName: {t.UserName}";
-
+                    tbxTokenValidity.Text = $"UserName: {t.UserName}";
+                    tbxTokenValidity.Text += $"\nId: {t.UserId}\n";
+                    tbxTokenValidity.Text += "Permission: " + t.Permission.ToString();
                 }
             }
             catch 
@@ -120,6 +117,18 @@ namespace CustomTokenTest
             }
         }
 
+        private void txbVerification_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (txbVerification.Text == "") { txbVerification.Text = "Click on an item in the list!";}
+        }
 
+        private void dataGrid1_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (dataGrid1.SelectedIndex >= 0)
+            {
+                txbVerification.Text = dataGrid1.Items[dataGrid1.SelectedIndex].ToString().Split(";")[0];
+                tbxTokenValidity.Clear();
+            }
+        }
     }
 }
