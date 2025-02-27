@@ -11,10 +11,10 @@ namespace CustomTokenTest
     {
         public List<CustomToken> tokens = new List<CustomToken>();
 
-        public static System.Timers.Timer aTimer;
+        public static System.Timers.Timer? aTimer;
 
         public bool AutoDecrease { get; private set; }
-        public bool AutoChangeToken { get; private set; }
+        public bool SingleUseToken { get; private set; }
         int interval;
         public int Interval
         {
@@ -24,13 +24,12 @@ namespace CustomTokenTest
                 interval = value;
                 if (interval == 0)
                 {
-                    aTimer.Close();
+                    aTimer?.Close();
                 }
                 else
                 {
                     SetTimer(Interval);
                 }
-
             }
         }
 
@@ -42,7 +41,7 @@ namespace CustomTokenTest
             aTimer.Enabled = true;
         }
 
-        public void OnTimedEvent(Object source, ElapsedEventArgs e)
+        public void OnTimedEvent(Object? source, ElapsedEventArgs e)
         {
             DecreaseExpirationTime();
         }
@@ -74,16 +73,16 @@ namespace CustomTokenTest
             tokens.Add(new CustomToken(userId, level, userName, expirationTime));
         }
 
-        public TokenHolder(bool autoChange, int interval)
+        public TokenHolder(bool singleUseToken, int interval)
         {
-            AutoChangeToken = autoChange;
+            SingleUseToken = singleUseToken;
             tokens.Add(new CustomToken(Guid.NewGuid(), 9, "Master", 0));
             Interval = interval;
         }
 
         public TokenHolder(Guid masterToken, bool autoChange, int interval)
         {
-            AutoChangeToken = autoChange;
+            SingleUseToken = false;
             tokens.Add(new CustomToken(masterToken, Guid.NewGuid(), 9, "Master", 0));
             Interval = interval;
         }
@@ -101,25 +100,19 @@ namespace CustomTokenTest
             if (index != -1)
             {
                 tokens[index].ResetRemainingTime();
-                if (AutoChangeToken == true && index!=0) { tokens[index].Token = Guid.NewGuid(); }
+                if (SingleUseToken == true && index!=0) { tokens[index].Token = Guid.NewGuid(); }
                 return tokens[index];
             }
             else
             {
                 return new CustomToken(new Guid(), -1, "", 0);
             }
-
-
         }
-
-
 
         ~TokenHolder()
         {
-            aTimer.Close();
+            aTimer?.Close();
         }
-
-
 
     }
 }

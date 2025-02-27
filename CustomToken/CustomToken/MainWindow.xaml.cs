@@ -22,8 +22,7 @@ namespace CustomTokenTest
         string[] expirationTime = new string[] { "20","30","60","600","3600"};
         TokenHolder tokenHolder = new TokenHolder(true,1000);
 
-        public static System.Timers.Timer aTimer1;
-        private object guid;
+        public static System.Timers.Timer? aTimer1;       
 
         public void SetTimer()
         {
@@ -33,14 +32,13 @@ namespace CustomTokenTest
             aTimer1.Enabled = true;
         }
 
-        public void OnTimed1Event(Object source, ElapsedEventArgs e)
+        public void OnTimed1Event(Object? source, ElapsedEventArgs e)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                dataGrid1.ItemsSource = tokenHolder.tokens;
+                dataGrid1.SelectedIndex = -1;
                 dataGrid1.Items.Refresh();
             });
-
         }
 
         public MainWindow()
@@ -49,13 +47,12 @@ namespace CustomTokenTest
             cmbPermission.ItemsSource = levels;
             cmbPermission.SelectedIndex = 2;
             cmbExpirationTime.ItemsSource = expirationTime;
-            cmbExpirationTime.SelectedIndex = 3;
+            cmbExpirationTime.SelectedIndex = 1;
             txbUserName.Text = "Bármi Áron";
             txbUserId.Text = Guid.NewGuid().ToString();
             dataGrid1.ItemsSource = tokenHolder.tokens;
             txbVerification.Text = "Click on an item in the list!";
-            SetTimer();
-            
+            SetTimer();            
         }
 
 
@@ -82,16 +79,15 @@ namespace CustomTokenTest
         private void dataGrid1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (dataGrid1.SelectedIndex>=0)
-            {
-                txbVerification.Text = dataGrid1.Items[dataGrid1.SelectedIndex].ToString().Split(";")[0];
+            {                
+                txbVerification.Text = dataGrid1.Items[dataGrid1.SelectedIndex].ToString()?.Split(";")[0];
                 tbxTokenValidity.Clear();
             }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            //aTimer1.Stop();
-            aTimer1.Close();
+            aTimer1?.Close();
         }
 
         private void btnVerification_Click(object sender, RoutedEventArgs e)
@@ -126,9 +122,10 @@ namespace CustomTokenTest
         {
             if (dataGrid1.SelectedIndex >= 0)
             {
-                txbVerification.Text = dataGrid1.Items[dataGrid1.SelectedIndex].ToString().Split(";")[0];
+                txbVerification.Text = dataGrid1.Items[dataGrid1.SelectedIndex].ToString()?.Split(";")[0];
                 tbxTokenValidity.Clear();
             }
         }
+
     }
 }

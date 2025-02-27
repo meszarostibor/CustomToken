@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomToken"
         mc:Ignorable="d"
-        Title="MainWindow" Height="650" Width="1200" WindowStartupLocation="CenterScreen" HorizontalAlignment="Left" Closing="Window_Closing">
+        Title="CustomTokenTest" Height="650" Width="1200" WindowStartupLocation="CenterScreen" HorizontalAlignment="Left" Closing="Window_Closing">
     <Grid Height="632" HorizontalAlignment="Center" Margin="0,1,0,1" Width="1200">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
